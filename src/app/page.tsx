@@ -4,6 +4,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import { getCurrent } from "@tauri-apps/plugin-deep-link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { BrowsersManagement } from "@/components/browsers-management";
 import { CamoufoxConfigDialog } from "@/components/camoufox-config-dialog";
 import { CloneProfileDialog } from "@/components/clone-profile-dialog";
 import { CommercialTrialModal } from "@/components/commercial-trial-modal";
@@ -30,6 +31,14 @@ import { SettingsDialog } from "@/components/settings-dialog";
 import { SyncAllDialog } from "@/components/sync-all-dialog";
 import { SyncConfigDialog } from "@/components/sync-config-dialog";
 import { SyncFollowerDialog } from "@/components/sync-follower-dialog";
+import { Button } from "@/components/ui/button";
+import {
+  Tabs,
+  TabsContent,
+  TabsContents,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs";
 import { WayfernTermsDialog } from "@/components/wayfern-terms-dialog";
 import { WindowResizeWarningDialog } from "@/components/window-resize-warning-dialog";
 import { useAppUpdateNotifications } from "@/hooks/use-app-update-notifications";
@@ -201,6 +210,8 @@ export default function Home() {
     useState<BrowserProfile | null>(null);
   const { isMicrophoneAccessGranted, isCameraAccessGranted, isInitialized } =
     usePermissions();
+
+  const [activeTab, setActiveTab] = useState<string>("profiles");
 
   const handleSelectGroup = useCallback((groupId: string) => {
     setSelectedGroupId(groupId);
@@ -1062,46 +1073,151 @@ export default function Home() {
             onSearchQueryChange={setSearchQuery}
           />
         </div>
-        <div className="w-full mt-2.5">
-          <GroupBadges
-            selectedGroupId={selectedGroupId}
-            onGroupSelect={handleSelectGroup}
-            groups={groupsData}
-            isLoading={isLoading}
-          />
-          <ProfilesDataTable
-            profiles={filteredProfiles}
-            onLaunchProfile={launchProfile}
-            onKillProfile={handleKillProfile}
-            onCloneProfile={handleCloneProfile}
-            onDeleteProfile={handleDeleteProfile}
-            onRenameProfile={handleRenameProfile}
-            onConfigureCamoufox={handleConfigureCamoufox}
-            onCopyCookiesToProfile={handleCopyCookiesToProfile}
-            onOpenCookieManagement={handleOpenCookieManagement}
-            runningProfiles={runningProfiles}
-            isUpdating={isUpdating}
-            onDeleteSelectedProfiles={handleDeleteSelectedProfiles}
-            onAssignProfilesToGroup={handleAssignProfilesToGroup}
-            selectedGroupId={selectedGroupId}
-            selectedProfiles={selectedProfiles}
-            onSelectedProfilesChange={setSelectedProfiles}
-            onBulkDelete={handleBulkDelete}
-            onBulkGroupAssignment={handleBulkGroupAssignment}
-            onBulkProxyAssignment={handleBulkProxyAssignment}
-            onBulkCopyCookies={handleBulkCopyCookies}
-            onBulkExtensionGroupAssignment={handleBulkExtensionGroupAssignment}
-            onAssignExtensionGroup={handleAssignExtensionGroup}
-            onOpenProfileSyncDialog={handleOpenProfileSyncDialog}
-            onToggleProfileSync={handleToggleProfileSync}
-            crossOsUnlocked={crossOsUnlocked}
-            syncUnlocked={syncUnlocked}
-            getProfileSyncInfo={getProfileSyncInfo}
-            onLaunchWithSync={(profile) => {
-              setSyncLeaderProfile(profile);
-            }}
-          />
-        </div>
+
+        <Tabs
+          value={activeTab}
+          onValueChange={setActiveTab}
+          className="w-full mt-4"
+        >
+          <TabsList className="bg-transparent border-b rounded-none w-full justify-start h-auto p-0 mb-6 px-4">
+            <TabsTrigger
+              value="profiles"
+              className="relative py-2 px-4 rounded-none h-10 data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+            >
+              Profiles
+            </TabsTrigger>
+            <TabsTrigger
+              value="proxies"
+              className="relative py-2 px-4 rounded-none h-10 data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+            >
+              Proxies
+            </TabsTrigger>
+            <TabsTrigger
+              value="groups"
+              className="relative py-2 px-4 rounded-none h-10 data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+            >
+              Groups
+            </TabsTrigger>
+            <TabsTrigger
+              value="extensions"
+              className="relative py-2 px-4 rounded-none h-10 data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+            >
+              Extensions
+            </TabsTrigger>
+            <TabsTrigger
+              value="browsers"
+              className="relative py-2 px-4 rounded-none h-10 data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+            >
+              Browsers
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContents>
+            <TabsContent value="profiles" className="mt-0">
+              <div className="w-full">
+                <GroupBadges
+                  selectedGroupId={selectedGroupId}
+                  onGroupSelect={handleSelectGroup}
+                  groups={groupsData}
+                  isLoading={isLoading}
+                />
+                <ProfilesDataTable
+                  profiles={filteredProfiles}
+                  onLaunchProfile={launchProfile}
+                  onKillProfile={handleKillProfile}
+                  onCloneProfile={handleCloneProfile}
+                  onDeleteProfile={handleDeleteProfile}
+                  onRenameProfile={handleRenameProfile}
+                  onConfigureCamoufox={handleConfigureCamoufox}
+                  onCopyCookiesToProfile={handleCopyCookiesToProfile}
+                  onOpenCookieManagement={handleOpenCookieManagement}
+                  runningProfiles={runningProfiles}
+                  isUpdating={isUpdating}
+                  onDeleteSelectedProfiles={handleDeleteSelectedProfiles}
+                  onAssignProfilesToGroup={handleAssignProfilesToGroup}
+                  selectedGroupId={selectedGroupId}
+                  selectedProfiles={selectedProfiles}
+                  onSelectedProfilesChange={setSelectedProfiles}
+                  onBulkDelete={handleBulkDelete}
+                  onBulkGroupAssignment={handleBulkGroupAssignment}
+                  onBulkProxyAssignment={handleBulkProxyAssignment}
+                  onBulkCopyCookies={handleBulkCopyCookies}
+                  onBulkExtensionGroupAssignment={
+                    handleBulkExtensionGroupAssignment
+                  }
+                  onAssignExtensionGroup={handleAssignExtensionGroup}
+                  onOpenProfileSyncDialog={handleOpenProfileSyncDialog}
+                  onToggleProfileSync={handleToggleProfileSync}
+                  crossOsUnlocked={crossOsUnlocked}
+                  syncUnlocked={syncUnlocked}
+                  getProfileSyncInfo={getProfileSyncInfo}
+                  onLaunchWithSync={(profile) => {
+                    setSyncLeaderProfile(profile);
+                  }}
+                />
+              </div>
+            </TabsContent>
+
+            <TabsContent value="proxies" className="mt-0">
+              <div className="bg-card border rounded-lg p-6">
+                <h2 className="text-xl font-semibold mb-4">
+                  Proxy & VPN Management
+                </h2>
+                <p className="text-muted-foreground mb-6">
+                  Manage your global proxy and VPN configurations. Use the
+                  button in the header or the dropdown to open the full
+                  management dialog for advanced actions like import/export.
+                </p>
+                <Button
+                  onClick={() => {
+                    setProxyManagementDialogOpen(true);
+                  }}
+                >
+                  Manage Proxies & VPNs
+                </Button>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="groups" className="mt-0">
+              <div className="bg-card border rounded-lg p-6">
+                <h2 className="text-xl font-semibold mb-4">Group Management</h2>
+                <p className="text-muted-foreground mb-6">
+                  Organize your profiles into groups. Open the management dialog
+                  to create, rename, or delete groups.
+                </p>
+                <Button
+                  onClick={() => {
+                    setGroupManagementDialogOpen(true);
+                  }}
+                >
+                  Manage Groups
+                </Button>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="extensions" className="mt-0">
+              <div className="bg-card border rounded-lg p-6">
+                <h2 className="text-xl font-semibold mb-4">
+                  Extension Management
+                </h2>
+                <p className="text-muted-foreground mb-6">
+                  Manage browser extensions and extension groups globally.
+                </p>
+                <Button
+                  onClick={() => {
+                    setExtensionManagementDialogOpen(true);
+                  }}
+                >
+                  Manage Extensions
+                </Button>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="browsers" className="mt-0 px-4">
+              <BrowsersManagement />
+            </TabsContent>
+          </TabsContents>
+        </Tabs>
       </main>
 
       <CreateProfileDialog

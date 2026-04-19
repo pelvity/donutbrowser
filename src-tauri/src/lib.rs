@@ -1,7 +1,7 @@
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
 use std::env;
 use std::sync::Mutex;
-use tauri::{Manager, Runtime, WebviewUrl, WebviewWindow, WebviewWindowBuilder};
+use tauri::{Manager, Runtime, WebviewWindow};
 use tauri_plugin_deep_link::DeepLinkExt;
 use tauri_plugin_log::{Target, TargetKind};
 
@@ -1190,6 +1190,14 @@ async fn generate_sample_fingerprint(
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+  #[cfg(target_os = "linux")]
+  {
+    // Fix for white screen / GBM buffer errors on NVIDIA GPUs
+    if std::env::var("WEBKIT_DISABLE_COMPOSITING_MODE").is_err() {
+      std::env::set_var("WEBKIT_DISABLE_COMPOSITING_MODE", "1");
+    }
+  }
+
   let args: Vec<String> = env::args().collect();
   let startup_url = args.iter().find(|arg| arg.starts_with("http")).cloned();
 
@@ -1237,6 +1245,18 @@ pub fn run() {
           let _ = window.show();
           let _ = window.set_focus();
           let _ = window.unminimize();
+
+          // Extract URL from command-line arguments if present
+          if let Some(url) = args.iter().find(|arg| arg.starts_with("http")) {
+            log::info!("Found URL in single-instance args: {url}");
+            let handle = app_handle.clone();
+            let url = url.clone();
+            tauri::async_runtime::spawn(async move {
+              if let Err(e) = handle_url_open(handle, url).await {
+                log::error!("Failed to handle URL from single-instance: {e}");
+              }
+            });
+          }
         }
       },
     ))
@@ -1264,22 +1284,13 @@ pub fn run() {
         }
       }
 
-      // Create the main window programmatically
-      #[allow(unused_variables)]
-      let win_builder = WebviewWindowBuilder::new(app, "main", WebviewUrl::default())
-        .title("Donut Browser")
-        .inner_size(800.0, 500.0)
-        .resizable(false)
-        .fullscreen(false)
-        .center()
-        .focused(true)
-        .visible(true);
+      // Get the main window created from tauri.conf.json
+      let _window = app
+        .get_webview_window("main")
+        .expect("Failed to get main window");
 
       #[cfg(target_os = "windows")]
-      let win_builder = win_builder.decorations(false);
-
-      #[allow(unused_variables)]
-      let window = win_builder.build().unwrap();
+      let _ = window.set_decorations(false);
 
       // Set transparent titlebar for macOS
       #[cfg(target_os = "macos")]

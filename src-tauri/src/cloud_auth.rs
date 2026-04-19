@@ -624,6 +624,11 @@ impl CloudAuthManager {
   }
 
   pub async fn has_active_paid_subscription(&self) -> bool {
+    // Development bypass for full access to Pro features
+    if cfg!(debug_assertions) || std::env::var("DONUT_BROWSER_FULL_ACCESS").is_ok() {
+      return true;
+    }
+
     let state = self.state.lock().await;
     match &*state {
       Some(auth) => {
@@ -637,6 +642,11 @@ impl CloudAuthManager {
 
   /// Non-async version that uses try_lock, defaults to false if lock can't be acquired.
   pub fn has_active_paid_subscription_sync(&self) -> bool {
+    // Development bypass for full access to Pro features
+    if cfg!(debug_assertions) || std::env::var("DONUT_BROWSER_FULL_ACCESS").is_ok() {
+      return true;
+    }
+
     match self.state.try_lock() {
       Ok(state) => match &*state {
         Some(auth) => {
@@ -667,6 +677,27 @@ impl CloudAuthManager {
   }
 
   pub async fn get_user(&self) -> Option<CloudAuthState> {
+    if cfg!(debug_assertions) || std::env::var("DONUT_BROWSER_FULL_ACCESS").is_ok() {
+      return Some(CloudAuthState {
+        user: CloudUser {
+          id: "dev-user".to_string(),
+          email: "dev@donutbrowser.com".to_string(),
+          plan: "pro".to_string(),
+          plan_period: Some("lifetime".to_string()),
+          subscription_status: "active".to_string(),
+          profile_limit: 9999,
+          cloud_profiles_used: 0,
+          proxy_bandwidth_limit_mb: 100 * 1024, // 100GB
+          proxy_bandwidth_used_mb: 0,
+          proxy_bandwidth_extra_mb: 0,
+          team_id: None,
+          team_name: None,
+          team_role: None,
+        },
+        logged_in_at: Utc::now().to_rfc3339(),
+      });
+    }
+
     let state = self.state.lock().await;
     state.clone()
   }

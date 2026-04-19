@@ -34,6 +34,15 @@ impl CommercialLicenseManager {
   }
 
   pub async fn get_trial_status(&self, app_handle: &AppHandle) -> Result<TrialStatus, String> {
+    if cfg!(debug_assertions) || std::env::var("DONUT_BROWSER_FULL_ACCESS").is_ok() {
+      return Ok(TrialStatus::Active {
+        remaining_seconds: 365 * 24 * 60 * 60,
+        days_remaining: 365,
+        hours_remaining: 0,
+        minutes_remaining: 0,
+      });
+    }
+
     let first_launch = self.get_or_set_first_launch(app_handle).await?;
     let now = Self::get_current_timestamp();
 

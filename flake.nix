@@ -214,6 +214,7 @@
                 export LIBRARY_PATH="${runtimeLibPath}:''${LIBRARY_PATH:-}"
                 export PKG_CONFIG_PATH="${pkgConfigPath}:''${PKG_CONFIG_PATH:-}"
                 export RUST_SRC_PATH="${pkgs.rustPlatform.rustLibSrc}"
+                export WEBKIT_DISABLE_COMPOSITING_MODE=1
                 ${text}
               '';
             };
@@ -254,6 +255,7 @@
             export LIBRARY_PATH="${runtimeLibPath}:''${LIBRARY_PATH:-}"
             export PKG_CONFIG_PATH="${pkgConfigPath}:''${PKG_CONFIG_PATH:-}"
             export RUST_SRC_PATH="${pkgs.rustPlatform.rustLibSrc}"
+            export WEBKIT_DISABLE_COMPOSITING_MODE=1
             export XDG_DATA_DIRS="${pkgs.gsettings-desktop-schemas}/share:${pkgs.gtk3}/share:''${XDG_DATA_DIRS:-}"
 
             echo "Donut Browser dev shell ready."

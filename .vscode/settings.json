@@ -312,5 +312,6 @@
     "zhom",
     "zipball",
     "zoneinfo"
-  ]
+  ],
+  "specstory.cloudSync.enabled": "never"
 }
