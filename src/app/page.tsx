@@ -120,10 +120,7 @@ export default function Home() {
 
   // Cloud auth for cross-OS unlock
   const { user: cloudUser } = useCloudAuth();
-  const crossOsUnlocked =
-    cloudUser?.plan !== "free" &&
-    (cloudUser?.subscriptionStatus === "active" ||
-      cloudUser?.planPeriod === "lifetime");
+  const crossOsUnlocked = true;
 
   const [selfHostedSyncConfigured, setSelfHostedSyncConfigured] =
     useState(false);
@@ -1434,13 +1431,7 @@ export default function Home() {
 
       {/* Commercial Trial Modal - shown once when trial expires (skip for paid users) */}
       <CommercialTrialModal
-        isOpen={
-          !termsLoading &&
-          termsAccepted === true &&
-          trialStatus?.type === "Expired" &&
-          !trialAcknowledged &&
-          !crossOsUnlocked
-        }
+        isOpen={false}
         onClose={checkTrialStatus}
       />
 
